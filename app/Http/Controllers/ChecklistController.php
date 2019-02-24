@@ -120,6 +120,8 @@ class ChecklistController extends Controller
 
         $data = $request->data['attribute'];
         
+        Checklist::findOrFail($checklistId);
+
         $item = Item::create([
             'checklist_id' => $checklistId,
             'description' => $data['description'],
@@ -280,8 +282,7 @@ class ChecklistController extends Controller
     public function showTemplate($templateId)
     {
         $template = Template::with('checklist.items:checklist_id,id,urgency,due_unit,due_interval')->find($templateId);
-        $a = $template->checklist['items'];
-        $checklist = unset($a['items']);
+        
         $response = [
             'data' => [
                 'type' => 'templates', 
@@ -289,7 +290,7 @@ class ChecklistController extends Controller
                 'attributes' => [
                     'name' => $template->name,
                     'items' => $template->checklist->items,
-                    'checklist' => $checklist
+                    'checklist' => Template::with('checklist')->find($templateId)->checklist
                 ],
                 'links' => ['self' => Req::fullUrl()]
             ]
